@@ -63,7 +63,6 @@
         dr-gpios = <&gpio0 2 (GPIO_ACTIVE_HIGH)>;
         sensitivity = "4x";
         x-invert;
-        curved-overlay;
         //sleep;
     };
 };
