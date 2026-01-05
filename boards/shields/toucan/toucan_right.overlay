@@ -67,7 +67,7 @@
         y-axis-z-min = <2>;
         x-invert;
         no-secondary-tap;
-	    //sleep;
+	    sleep;
     };
 };
 
