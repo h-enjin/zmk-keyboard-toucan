@@ -4,3 +4,89 @@ on: [push, pull_request, workflow_dispatch]
 jobs:
   build:
     uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3
+
+  notify-discord:
+    needs: build
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Get workflow run URL
+        id: get-url
+        run: |
+          echo "run_url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_OUTPUT
+
+      - name: Notify Discord on Success
+        if: needs.build.result == 'success'
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -H "Content-Type: application/json" \
+            -X POST \
+            -d "{
+              \"embeds\": [{
+                \"title\": \"✅ ZMK Firmware Build Success!\",
+                \"description\": \"ビルドが正常に完了したよ〜！\",
+                \"color\": 5763719,
+                \"fields\": [
+                  {
+                    \"name\": \"📦 ダウンロード\",
+                    \"value\": \"[ビルドファイルはこちら](${{ steps.get-url.outputs.run_url }}#artifacts)\"
+                  },
+                  {
+                    \"name\": \"🔗 詳細\",
+                    \"value\": \"[ワークフロー実行結果](${{ steps.get-url.outputs.run_url }})\"
+                  },
+                  {
+                    \"name\": \"📝 コミット\",
+                    \"value\": \"\`${{ github.sha }}\`\",
+                    \"inline\": true
+                  },
+                  {
+                    \"name\": \"🌿 ブランチ\",
+                    \"value\": \"\`${{ github.ref_name }}\`\",
+                    \"inline\": true
+                  }
+                ],
+                \"footer\": {
+                  \"text\": \"${{ github.repository }}\"
+                },
+                \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+              }]
+            }" \
+            $DISCORD_WEBHOOK
+
+      - name: Notify Discord on Failure
+        if: needs.build.result == 'failure'
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -H "Content-Type: application/json" \
+            -X POST \
+            -d "{
+              \"embeds\": [{
+                \"title\": \"❌ ZMK Firmware Build Failed\",
+                \"description\": \"ビルドに失敗しちゃった...\",
+                \"color\": 15548997,
+                \"fields\": [
+                  {
+                    \"name\": \"🔗 詳細\",
+                    \"value\": \"[エラーログを確認する](${{ steps.get-url.outputs.run_url }})\"
+                  },
+                  {
+                    \"name\": \"📝 コミット\",
+                    \"value\": \"\`${{ github.sha }}\`\",
+                    \"inline\": true
+                  },
+                  {
+                    \"name\": \"🌿 ブランチ\",
+                    \"value\": \"\`${{ github.ref_name }}\`\",
+                    \"inline\": true
+                  }
+                ],
+                \"footer\": {
+                  \"text\": \"${{ github.repository }}\"
+                },
+                \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+              }]
+            }" \
+            $DISCORD_WEBHOOK
