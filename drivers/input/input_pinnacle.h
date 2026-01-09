@@ -107,3 +107,4 @@ struct pinnacle_config {
 };
 
 int pinnacle_set_sleep(const struct device *dev, bool enabled);
+int pinnacle_set_idle(const struct device *dev, bool enabled);

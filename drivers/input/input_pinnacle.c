@@ -421,6 +421,36 @@ int pinnacle_set_sleep(const struct device *dev, bool enabled) {
     return ret;
 }
 
+int pinnacle_set_idle(const struct device *dev, bool enabled) {
+    uint8_t feed_cfg1;
+    int ret = pinnacle_seq_read(dev, PINNACLE_FEED_CFG1, &feed_cfg1, 1);
+    if (ret < 0) {
+        LOG_ERR("can't read feed config %d", ret);
+        return ret;
+    }
+
+    bool currently_feeding = (feed_cfg1 & PINNACLE_FEED_CFG1_EN_FEED) != 0;
+    if (currently_feeding == !enabled) {
+        return 0; // Already in desired state
+    }
+
+    LOG_DBG("Setting idle (feed %s)", (enabled ? "disabled" : "enabled"));
+
+    if (enabled) {
+        feed_cfg1 &= ~PINNACLE_FEED_CFG1_EN_FEED; // Disable feed
+    } else {
+        feed_cfg1 |= PINNACLE_FEED_CFG1_EN_FEED;  // Enable feed
+    }
+
+    ret = pinnacle_write(dev, PINNACLE_FEED_CFG1, feed_cfg1);
+    if (ret < 0) {
+        LOG_ERR("can't write feed config %d", ret);
+        return ret;
+    }
+
+    return ret;
+}
+
 static int pinnacle_init(const struct device *dev) {
     struct pinnacle_data *data = dev->data;
     const struct pinnacle_config *config = dev->config;

@@ -24,9 +24,11 @@ static int on_activity_state(const zmk_event_t *eh) {
         return 0;
     }
 
-    bool sleep = state_ev->state == ZMK_ACTIVITY_ACTIVE ? 0 : 1;
+    bool idle = state_ev->state != ZMK_ACTIVITY_ACTIVE;
+    LOG_DBG("Activity state changed, setting idle: %d", idle);
     for (size_t i = 0; i < ARRAY_SIZE(pinnacle_devs); i++) {
-        pinnacle_set_sleep(pinnacle_devs[i], sleep);
+        // Use idle mode (feed disable) instead of full sleep for faster wake
+        pinnacle_set_idle(pinnacle_devs[i], idle);
     }
 
     return 0;
