@@ -14,6 +14,12 @@ properties:
     type: int
     description: Maximum SPI clock frequency (for SPI bus)
 
+  duplex:
+    type: int
+    default: 0
+    description: |
+      SPI duplex mode: 0 = full-duplex (default), 1 = half-duplex
+
   dr-gpios:
     type: phandle-array
     description: |
