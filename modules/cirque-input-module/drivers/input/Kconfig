@@ -1,0 +1,44 @@
+# Copyright (c) 2022 The ZMK Contributors
+# SPDX-License-Identifier: MIT
+
+menuconfig INPUT_PINNACLE
+	bool "Cirque Pinnacle Trackpad"
+	default y
+	depends on DT_HAS_CIRQUE_PINNACLE_ENABLED
+	depends on GPIO
+	depends on SPI || I2C
+	depends on INPUT
+	help
+	  Enable driver for Cirque Pinnacle trackpad
+
+if INPUT_PINNACLE
+
+config INPUT_PINNACLE_INIT_PRIORITY
+	int "Init priority"
+	default INPUT_INIT_PRIORITY
+	help
+	  Pinnacle device driver initialization priority.
+
+config ZMK_INPUT_PINNACLE_IDLE_SLEEPER
+	bool "Enable ZMK idle-linked sleep for Pinnacle"
+	default n
+	depends on ZMK_POINTING
+	help
+	  Enable automatic sleep/wake for Pinnacle based on ZMK activity state.
+
+config ZMK_INPUT_PINNACLE_WAKE_ON_TOUCH
+	bool "Enable Wake-on-Touch optimization"
+	default y
+	depends on ZMK_INPUT_PINNACLE_IDLE_SLEEPER
+	help
+	  Keep DR GPIO interrupt enabled during sleep for instant wake-on-touch.
+	  This reduces wake latency significantly.
+
+config ZMK_INPUT_PINNACLE_FAST_WAKE
+	bool "Enable fast wake mode (skip calibration on resume)"
+	default y
+	depends on ZMK_INPUT_PINNACLE_IDLE_SLEEPER
+	help
+	  Skip calibration and use minimal initialization on wake for faster response.
+
+endif # INPUT_PINNACLE
