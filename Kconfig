@@ -1,2 +1,0 @@
-# Cirque Pinnacle driver configuration
-rsource "drivers/input/Kconfig"

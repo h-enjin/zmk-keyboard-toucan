@@ -12,8 +12,9 @@ manifest:
     - name: zmk
       remote: zmkfirmware
       import: app/west.yml
-    # Note: cirque-input-module is now included locally in drivers/input/
-    # with Wake-on-Touch optimization. Original was: petejohanson/cirque-input-module
+    - name: cirque-input-module
+      remote: petejohanson
+      revision: main
     - name: zmk-rgbled-widget
       remote: caksoylar
       revision: main
