@@ -2,6 +2,7 @@
 
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
+#include <zephyr/kernel.h>
 #include <zmk/event_manager.h>
 #include <zmk/events/activity_state_changed.h>
 #include "input_pinnacle.h"
@@ -16,6 +17,44 @@ static const struct device *pinnacle_devs[] = {
     DT_FOREACH_STATUS_OKAY(cirque_pinnacle, GET_PINNACLE)
 };
 
+// Polling interval in milliseconds (lower = faster wake, higher = more power saving)
+#define TOUCH_POLL_INTERVAL_MS 50
+
+static bool is_idle = false;
+static struct k_work_delayable poll_work;
+
+static void poll_for_touch(struct k_work *work) {
+    if (!is_idle) {
+        return;
+    }
+
+    for (size_t i = 0; i < ARRAY_SIZE(pinnacle_devs); i++) {
+        // Briefly enable feed to check for touch
+        pinnacle_set_idle(pinnacle_devs[i], false);
+
+        // Small delay to let data become available
+        k_usleep(100);
+
+        // Check if there's touch data
+        if (pinnacle_check_touch(pinnacle_devs[i])) {
+            // Touch detected! Process the data
+            LOG_DBG("Touch detected during idle, processing");
+            pinnacle_trigger_report(pinnacle_devs[i]);
+            // Keep feed enabled for continuous tracking
+            // Don't disable feed - let normal operation continue
+            // Re-schedule poll to check when touch ends
+            k_work_schedule(&poll_work, K_MSEC(TOUCH_POLL_INTERVAL_MS));
+            return;
+        }
+
+        // No touch, disable feed again to save power
+        pinnacle_set_idle(pinnacle_devs[i], true);
+    }
+
+    // Schedule next poll
+    k_work_schedule(&poll_work, K_MSEC(TOUCH_POLL_INTERVAL_MS));
+}
+
 static int on_activity_state(const zmk_event_t *eh) {
     struct zmk_activity_state_changed *state_ev = as_zmk_activity_state_changed(eh);
 
@@ -24,15 +63,39 @@ static int on_activity_state(const zmk_event_t *eh) {
         return 0;
     }
 
-    bool idle = state_ev->state != ZMK_ACTIVITY_ACTIVE;
-    LOG_DBG("Activity state changed, setting idle: %d", idle);
-    for (size_t i = 0; i < ARRAY_SIZE(pinnacle_devs); i++) {
-        // Use idle mode (feed disable) instead of full sleep for faster wake
-        pinnacle_set_idle(pinnacle_devs[i], idle);
+    bool new_idle = state_ev->state != ZMK_ACTIVITY_ACTIVE;
+
+    if (new_idle == is_idle) {
+        return 0; // No state change
+    }
+
+    is_idle = new_idle;
+    LOG_DBG("Activity state changed, idle: %d", is_idle);
+
+    if (is_idle) {
+        // Going idle - disable feed and start polling
+        for (size_t i = 0; i < ARRAY_SIZE(pinnacle_devs); i++) {
+            pinnacle_set_idle(pinnacle_devs[i], true);
+        }
+        // Start polling for touch
+        k_work_schedule(&poll_work, K_MSEC(TOUCH_POLL_INTERVAL_MS));
+    } else {
+        // Waking up - cancel polling and enable feed
+        k_work_cancel_delayable(&poll_work);
+        for (size_t i = 0; i < ARRAY_SIZE(pinnacle_devs); i++) {
+            pinnacle_set_idle(pinnacle_devs[i], false);
+        }
     }
 
     return 0;
 }
+
+static int pinnacle_sleeper_init(void) {
+    k_work_init_delayable(&poll_work, poll_for_touch);
+    return 0;
+}
+
+SYS_INIT(pinnacle_sleeper_init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
 
 ZMK_LISTENER(zmk_pinnacle_idle_sleeper, on_activity_state);
 ZMK_SUBSCRIPTION(zmk_pinnacle_idle_sleeper, zmk_activity_state_changed);

@@ -451,6 +451,22 @@ int pinnacle_set_idle(const struct device *dev, bool enabled) {
     return ret;
 }
 
+bool pinnacle_check_touch(const struct device *dev) {
+    uint8_t status;
+    int ret = pinnacle_seq_read(dev, PINNACLE_STATUS1, &status, 1);
+    if (ret < 0) {
+        return false;
+    }
+    // Check if SW_DR (Software Data Ready) is set
+    return (status & PINNACLE_STATUS1_SW_DR) != 0;
+}
+
+int pinnacle_trigger_report(const struct device *dev) {
+    struct pinnacle_data *data = dev->data;
+    k_work_submit(&data->work);
+    return 0;
+}
+
 static int pinnacle_init(const struct device *dev) {
     struct pinnacle_data *data = dev->data;
     const struct pinnacle_config *config = dev->config;
