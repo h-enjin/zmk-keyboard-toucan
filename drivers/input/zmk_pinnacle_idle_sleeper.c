@@ -37,13 +37,12 @@ static void poll_for_touch(struct k_work *work) {
 
         // Check if there's touch data
         if (pinnacle_check_touch(pinnacle_devs[i])) {
-            // Touch detected! Process the data
-            LOG_DBG("Touch detected during idle, processing");
+            // Touch detected! Process the data and stop polling
+            LOG_DBG("Touch detected during idle, waking up");
             pinnacle_trigger_report(pinnacle_devs[i]);
-            // Keep feed enabled for continuous tracking
-            // Don't disable feed - let normal operation continue
-            // Re-schedule poll to check when touch ends
-            k_work_schedule(&poll_work, K_MSEC(TOUCH_POLL_INTERVAL_MS));
+            // Keep feed enabled and let normal interrupt-driven tracking take over
+            // Don't re-schedule polling - ZMK activity state change will handle return to idle
+            is_idle = false;
             return;
         }
 
