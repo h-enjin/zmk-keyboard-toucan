@@ -4,5 +4,3 @@ build:
   settings:
     board_root: .
     dts_root: .
-    extra_modules:
-      - modules/cirque-input-module

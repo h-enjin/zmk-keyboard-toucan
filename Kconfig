@@ -1,2 +1,2 @@
-# Local module configurations
-rsource "modules/cirque-input-module/Kconfig"
+# Cirque Pinnacle driver configuration
+rsource "drivers/input/Kconfig"
