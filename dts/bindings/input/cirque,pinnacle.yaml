@@ -5,9 +5,14 @@ description: Cirque Pinnacle Trackpad
 
 compatible: "cirque,pinnacle"
 
-include: [spi-device.yaml, i2c-device.yaml]
-
 properties:
+  reg:
+    required: true
+
+  spi-max-frequency:
+    type: int
+    description: Maximum SPI clock frequency (for SPI bus)
+
   dr-gpios:
     type: phandle-array
     description: |
