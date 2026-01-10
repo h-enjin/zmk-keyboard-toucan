@@ -45,6 +45,10 @@ jobs:
                     \"name\": \"🌿 ブランチ\",
                     \"value\": \"\`${{ github.ref_name }}\`\",
                     \"inline\": true
+                  },
+                  {
+                    \"name\": \"💬 コミットメッセージ\",
+                    \"value\": \"${{ github.event.head_commit.message }}\"
                   }
                 ],
                 \"footer\": {
@@ -81,6 +85,10 @@ jobs:
                     \"name\": \"🌿 ブランチ\",
                     \"value\": \"\`${{ github.ref_name }}\`\",
                     \"inline\": true
+                  },
+                  {
+                    \"name\": \"💬 コミットメッセージ\",
+                    \"value\": \"${{ github.event.head_commit.message }}\"
                   }
                 ],
                 \"footer\": {
