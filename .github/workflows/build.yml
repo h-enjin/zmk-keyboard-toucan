@@ -14,6 +14,9 @@ jobs:
         id: get-url
         run: |
           echo "run_url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_OUTPUT
+          # Get first line of commit message and escape for JSON
+          COMMIT_MSG=$(echo "${{ github.event.head_commit.message }}" | head -n 1 | sed 's/"/\\"/g' | sed "s/'/\\'/g")
+          echo "commit_msg=$COMMIT_MSG" >> $GITHUB_OUTPUT
 
       - name: Notify Discord on Success
         if: needs.build.result == 'success'
@@ -48,7 +51,7 @@ jobs:
                   },
                   {
                     \"name\": \"💬 コミットメッセージ\",
-                    \"value\": \"${{ github.event.head_commit.message }}\"
+                    \"value\": \"${{ steps.get-url.outputs.commit_msg }}\"
                   }
                 ],
                 \"footer\": {
@@ -88,7 +91,7 @@ jobs:
                   },
                   {
                     \"name\": \"💬 コミットメッセージ\",
-                    \"value\": \"${{ github.event.head_commit.message }}\"
+                    \"value\": \"${{ steps.get-url.outputs.commit_msg }}\"
                   }
                 ],
                 \"footer\": {
