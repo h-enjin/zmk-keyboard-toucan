@@ -97,10 +97,14 @@ static void set_battery_peripheral_status(struct zmk_widget_screen *widget,
     uint8_t level = 0;
     int ret = zmk_split_central_get_peripheral_battery_level(0, &level);
     
+    LOG_DBG("Peripheral battery get: ret=%d, level=%d", ret, level);
+    
     if (ret == 0) {  // 成功した場合のみ更新
         widget->state.battery_p = level;
+        LOG_DBG("Peripheral battery updated to: %d", level);
+    } else {
+        LOG_DBG("Peripheral battery get failed, keeping current value");
     }
-    // 失敗した場合は現在の値を維持（デフォルト0のまま）
     
     draw_top(widget->obj, widget->cbuf, &widget->state);
 }
@@ -117,9 +121,11 @@ static struct battery_peripheral_status_state battery_peripheral_status_get_stat
     uint8_t level = 0;  // デフォルト値
     if (ev != NULL) {
         level = ev->state_of_charge;
+        LOG_DBG("Peripheral battery event received: level=%d", level);
     } else {
         // イベントがない場合は直接取得を試みる
         zmk_split_central_get_peripheral_battery_level(0, &level);
+        LOG_DBG("No peripheral battery event, direct get: level=%d", level);
     }
 
     return (struct battery_peripheral_status_state){
