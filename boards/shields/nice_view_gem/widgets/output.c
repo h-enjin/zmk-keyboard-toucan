@@ -36,8 +36,8 @@ static void draw_ble_profile_name(lv_obj_t *canvas, int profile_index) {
 
     lv_draw_label_dsc_t label_dsc;
     init_label_dsc(&label_dsc, LVGL_FOREGROUND, &quinquefive_8, LV_TEXT_ALIGN_LEFT);
-    // Position: after "BLE" text (X=12 + ~30px) with small gap
-    lv_canvas_draw_text(canvas, 45, 140, 38, &label_dsc, name);
+    // Position: after "BLE" text, width allows 4 chars before profile boxes (X=85)
+    lv_canvas_draw_text(canvas, 42, 140, 42, &label_dsc, name);
 }
 #endif
 
