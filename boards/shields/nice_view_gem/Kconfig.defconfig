@@ -37,6 +37,41 @@ config NICE_VIEW_WIDGET_STATUS
 config NICE_VIEW_WIDGET_INVERTED
     bool "Invert display colors"
 
+config NICE_VIEW_BLE_PROFILE_0_NAME
+    string "BLE Profile 0 display name"
+    default ""
+    help
+      Display name for BLE profile 0. Max 4 characters recommended.
+      Leave empty to hide.
+
+config NICE_VIEW_BLE_PROFILE_1_NAME
+    string "BLE Profile 1 display name"
+    default ""
+    help
+      Display name for BLE profile 1. Max 4 characters recommended.
+      Leave empty to hide.
+
+config NICE_VIEW_BLE_PROFILE_2_NAME
+    string "BLE Profile 2 display name"
+    default ""
+    help
+      Display name for BLE profile 2. Max 4 characters recommended.
+      Leave empty to hide.
+
+config NICE_VIEW_BLE_PROFILE_3_NAME
+    string "BLE Profile 3 display name"
+    default ""
+    help
+      Display name for BLE profile 3. Max 4 characters recommended.
+      Leave empty to hide.
+
+config NICE_VIEW_BLE_PROFILE_4_NAME
+    string "BLE Profile 4 display name"
+    default ""
+    help
+      Display name for BLE profile 4. Max 4 characters recommended.
+      Leave empty to hide.
+
 if !ZMK_SPLIT || ZMK_SPLIT_ROLE_CENTRAL
 
 config NICE_VIEW_WIDGET_STATUS
