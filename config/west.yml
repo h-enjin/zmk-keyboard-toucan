@@ -10,6 +10,8 @@ manifest:
       url-base: https://github.com/caksoylar
     - name: geeksville
       url-base: https://github.com/geeksville
+    - name: prospector
+      url-base: https://github.com/t-ogura
   projects:
     - name: zmk
       remote: zmkfirmware
@@ -20,5 +22,9 @@ manifest:
     - name: zmk-rgbled-widget
       remote: caksoylar
       revision: main
+    - name: prospector-zmk-module
+      remote: prospector
+      revision: main
+      path: modules/prospector-zmk-module
   self:
     path: config
